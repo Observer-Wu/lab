@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from logging.handlers import RotatingFileHandler
 
 #set log
-fh = RotatingFileHandler('/home/wujunran/classify/scratchZombieWeiboLog', maxBytes=10*1024*1024, backupCount=10)
+fh = RotatingFileHandler('/home/wujunran/classify/scratchNormalWeiboLog', maxBytes=10*1024*1024, backupCount=10)
 fm = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 fh.setFormatter(fm)
 logger = logging.getLogger('scratch')
@@ -83,7 +83,7 @@ class scratchUser:
         def map_scratch_weibo(user):
             statuses = []
             try:
-                for page in range(1, min(11, user['statuses_count']/100+2)):
+                for page in range(1, min(12, user['statuses_count']/100+2)):
                     r = requests.get(self.api_weibo % (user['id'], page), timeout=60)
                     if r.status_code != 200 or 'errno' in r.json():
                         break
@@ -104,11 +104,13 @@ class scratchUser:
             return
         with open(os.path.join(DIC, 'count')) as fp:
             index = int(fp.read())
-        map(map_scratch_weibo, load_user()[index:index+1000])
+        if index == 83000:
+            return
+        map(map_scratch_weibo, load_user()[index:min(82787, index+1000)])
         with open(os.path.join(DIC, 'count'), 'w') as fp:
             fp.write(str(index+1000))
 
 
 if __name__ == '__main__':
     sc = scratchUser()
-    sc.scratch_user_weibo('zombie')
+    sc.scratch_user_weibo('normal')
